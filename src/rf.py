@@ -23,7 +23,7 @@ from utils import *
 from train_test_split import *
 
 
-def run_rf(X, y, n_iterations=10):
+def run_rf(X, y, n_iterations=8): # changed 10 -> 8, got stuck with the resource allocation for a long, one can revert back to 10. 
     random.seed(42)
 
     iteration_metrics = create_metric_dict()
@@ -73,7 +73,7 @@ def run_rf(X, y, n_iterations=10):
     print_iteration_metrics(iteration_metrics)
 
 
-def run_rf_inductive(original_X, y, column_names, n_iterations=10):
+def run_rf_inductive(original_X, y, column_names, n_iterations=8): # changed from 10 -> 8
     random.seed(42)
 
     n_graphs = len(y)
