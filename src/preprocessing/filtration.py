@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-"""
+
 '''
 Provides a module for calculating a filtration of a weighted graph. This
 operation is based on the `igraph` graph library.
@@ -110,3 +110,4 @@ def filtration_by_edge_attribute(graph, attribute='weight', delete_nodes=False, 
             break
 
     return F
+"""
