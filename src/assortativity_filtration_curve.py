@@ -38,7 +38,7 @@ def create_curves(args):
     # Compute a list of graph filtrations
     filtrated_graphs = build_filtration(graphs)
 
-    # Calculate assortativity coefficient for each graph
+    # Calculate the assortativity coefficient for each subgraph (remember that a filtration is a sequence of subgraphs)
     nested_assortativity_coefficients = [
         [subgraph.assortativity_degree() for _, subgraph in subgraphs]
         for subgraphs in filtrated_graphs
@@ -47,7 +47,7 @@ def create_curves(args):
     # Determine the maximum length among all lists
     max_length = max(len(lst) for lst in nested_assortativity_coefficients)
 
-    # Forward fill the lists using itertools.zip_longest
+    # Forward fill the lists to make sure they're equally long
     filtration_curves = [
         lst + [lst[-1]] * (max_length - len(lst))
         for lst in nested_assortativity_coefficients
