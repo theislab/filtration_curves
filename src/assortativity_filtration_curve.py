@@ -28,24 +28,39 @@ def create_curves(args):
     '''
 
     dataset = args.dataset
-    file_path = "../data/unlabeled_datasets/" + dataset + "/"
+    file_path = "../data/labeled_datasets/" + dataset + "/"
 
     # Load graphs
     filenames = sorted(glob.glob(os.path.join(file_path, '*.pickle')))
     graphs = [ig.read(filename, format='picklez') for filename in tqdm(filenames)]
     y = [graph['label'] for graph in graphs]
 
+    # Compute a list of graph filtrations
+    filtrated_graphs = build_filtration(graphs)
+
     # Calculate assortativity coefficient for each graph
-    assortativity_coefficients = [graph.assortativity_degree() for graph in tqdm(graphs)]
+    nested_assortativity_coefficients = [
+        [subgraph.assortativity_degree() for _, subgraph in subgraphs]
+        for subgraphs in filtrated_graphs
+    ]
+    
+    # Determine the maximum length among all lists
+    max_length = max(len(lst) for lst in nested_assortativity_coefficients)
+
+    # Forward fill the lists using itertools.zip_longest
+    filtration_curves = [
+        lst + [lst[-1]] * (max_length - len(lst))
+        for lst in nested_assortativity_coefficients
+    ]
 
     # Binarize the assortativity coefficients to create filtration curves
-    max_assortativity = max(assortativity_coefficients)
-    filtration_curves = [np.where(np.array(assortativity_coefficients) <= coefficient, 1, 0) for coefficient in tqdm(assortativity_coefficients)]
+    # max_assortativity = max(assortativity_coefficients)
+    # filtration_curves = [np.where(np.array(assortativity_coefficients) <= coefficient, 1, 0) for coefficient in tqdm(assortativity_coefficients)]
 
     # Pad the filtration curves with zeros to have consistent lengths
-    max_length = max([len(curve) for curve in filtration_curves])
-    filtration_curves = [np.pad(curve, (0, max_length - len(curve)), mode='constant') for curve in tqdm(filtration_curves)]
-    #breakpoint()
+    # max_length = max([len(curve) for curve in filtration_curves])
+    # filtration_curves = [np.pad(curve, (0, max_length - len(curve)), mode='constant') for curve in tqdm(filtration_curves)]
+
     return filtration_curves, y
     
 
