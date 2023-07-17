@@ -77,7 +77,7 @@ if __name__ == "__main__":
         filtration_curves = [np.asarray(i) for i in tqdm(filtration_curves)]
         weights = {0: 1.763, 1: 0.872}
         # run the random forest
-        run_rf(filtration_curves, y, n_iterations=10,weights=weights)
+        run_rf(filtration_curves, y, n_iterations=10)#weights=weights)
 
     elif args.method == "inductive":
         # format the curves as a dataframe
@@ -85,8 +85,8 @@ if __name__ == "__main__":
 
         # get the column names (just a single one here)
         column_names = filtration_curves[0].columns.tolist()
-        weights = {0: 1.763, 1: 0.872}
+        #weights = {0: 1.763, 1: 0.872}
         # run the random forest
-        run_rf_inductive(filtration_curves, y, column_names=column_names,weights=weights)
+        run_rf_inductive(filtration_curves, y, column_names=column_names)#weights=weights)
 
     print("Execution time:", time.process_time() - start, "seconds")

@@ -53,6 +53,7 @@ def create_curves(args):
         for lst in nested_assortativity_coefficients
     ]
 
+
     # Binarize the assortativity coefficients to create filtration curves
     # max_assortativity = max(assortativity_coefficients)
     # filtration_curves = [np.where(np.array(assortativity_coefficients) <= coefficient, 1, 0) for coefficient in tqdm(assortativity_coefficients)]
