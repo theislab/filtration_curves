@@ -4,11 +4,15 @@ import numpy as np
 from tqdm import tqdm
 import os
 import glob
+import itertools
 import pandas as pd
+import igraph as ig
 
 from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import LabelEncoder 
 from pyper.representations import BettiCurve, make_betti_curve
+
+from preprocessing.filtration import filtration_by_edge_attribute
 
 
 def node_label_distribution(filtration, label_to_index):
@@ -115,7 +119,39 @@ def reindex_filtration_curve(filtration_curve, new_index):
     return filtration_curve
 
 
-def save_curves(
+def build_filtration(graphs):
+    '''
+    Builds a filtration given a dataset of igraph graphs.
+
+    Parameters
+    ----------
+    graphs: list
+        List of labelled igraph graphs.
+
+    Returns
+    -------
+        A list of filtrations, where each filtration corresponds to a list of weight and subgraph pairs
+    '''
+    # sometimes the edge weight is stored as an edge attribute; we will
+    # change this to be an edge weight
+    for graph in graphs:
+        graph.es['weight'] = [e['attribute'] for e in graph.es]
+
+    # build the filtration using the edge weights
+    filtrated_graphs = [
+        filtration_by_edge_attribute(
+            graph,
+            attribute='weight',
+            delete_nodes=True,
+            stop_early=True
+        )
+        for graph in tqdm(graphs)
+    ]
+
+    return filtrated_graphs
+
+
+def save_node_label_curves(
         source_path="../data/labeled_datasets/BZR_MD",
         output_path="../data/labeled_datasets/preprocessed_data/BZR_MD/"
         ):
@@ -152,11 +188,6 @@ def save_curves(
         ig.read(filename, format='picklez') for filename in tqdm(filenames)
     ]
 
-    # sometimes the edge weight is stored as an edge attribute; we will
-    # change this to be an edge weight
-    for graph in graphs:
-        graph.es['weight'] = [e['attribute'] for e in graph.es]
-
     # Get all potential node labels to make sure that the distribution
     # can be calculated correctly later on.
     node_labels = sorted(set(
@@ -166,18 +197,9 @@ def save_curves(
     label_to_index = {
         label: index for index, label in enumerate(sorted(node_labels))
     }
-   
-    # build the filtration using the edge weights
-    filtrated_graphs = [
-        filtration_by_edge_attribute(
-            graph,
-            attribute='weight',
-            delete_nodes=True,
-            stop_early=True
-        )
-        for graph in tqdm(graphs)
-    ]
-    
+
+    filtrated_graphs = build_filtration(graphs)
+
     # Create a data frame for every graph and store it; the output is
     # determined by the input filename, albeit with a new extension.
     for index, filtrated_graph in enumerate(tqdm(filtrated_graphs)):

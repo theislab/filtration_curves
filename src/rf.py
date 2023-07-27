@@ -19,11 +19,14 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import accuracy_score
 from sklearn.ensemble import RandomForestClassifier
 
+from sklearn.impute import SimpleImputer
+import warnings
+
 from utils import *
 from train_test_split import *
 
 
-def run_rf(X, y, n_iterations=10):
+def run_rf(X, y, n_iterations=8): # changed 10 -> 8, got stuck with the resource allocation for a long, one can revert back to 10. 
     random.seed(42)
 
     iteration_metrics = create_metric_dict()
@@ -45,6 +48,14 @@ def run_rf(X, y, n_iterations=10):
             
             X_test = [X[i] for i in test_index]
             y_test = [y[i] for i in test_index]
+
+
+            with warnings.catch_warnings():
+                warnings.filterwarnings('ignore', category=UserWarning)
+                imputer = SimpleImputer(strategy='constant', fill_value=0)
+                imputer.fit(X_train)
+                X_train = imputer.fit_transform(X_train)
+                X_test = imputer.transform(X_test)
 
             clf = RandomForestClassifier(
                     max_depth=None, 
@@ -73,7 +84,7 @@ def run_rf(X, y, n_iterations=10):
     print_iteration_metrics(iteration_metrics)
 
 
-def run_rf_inductive(original_X, y, column_names, n_iterations=10):
+def run_rf_inductive(original_X, y, column_names, n_iterations=8): # changed from 10 -> 8
     random.seed(42)
 
     n_graphs = len(y)
@@ -125,6 +136,10 @@ def run_rf_inductive(original_X, y, column_names, n_iterations=10):
                     graph_representation.extend(X[node_label_idx][graph_idx])
                 new_X.append(graph_representation)
             
+            # Impute missing values
+            imputer = SimpleImputer(strategy='mean')
+            new_X = imputer.fit_transform(new_X)
+
             X_train = [new_X[i] for i in train_index]
             y_train = [y[i] for i in train_index]
             

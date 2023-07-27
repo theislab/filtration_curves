@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+
 '''
 Provides a module for calculating a filtration of a weighted graph. This
 operation is based on the `igraph` graph library.
@@ -76,3 +77,37 @@ def filtration_by_edge_attribute(
 
 
     return F
+
+"""
+
+#Alternate code to the above one
+import igraph as ig
+import numpy as np
+
+def filtration_by_edge_attribute(graph, attribute='weight', delete_nodes=False, stop_early=False):
+    weights = graph.es[attribute]
+
+    if len(weights.shape) == 2 and weights.shape[1] == 1:
+        weights = weights.squeeze()
+    else:
+        raise RuntimeError('Unexpected edge attribute shape')
+
+    F = []
+
+    n_nodes = graph.vcount()
+
+    if weights.size == 1:
+        edges = np.array([i for i, edge in enumerate(graph.es) if edge[attribute] <= weights[0]])
+    else:
+        sorted_indices = np.argsort(weights)
+        edges = np.array([i for i in sorted_indices if weights[i] <= weights[sorted_indices[i]]])
+
+    subgraph = graph.es[edges].subgraph(delete_vertices=delete_nodes)
+    for i, weight in enumerate(weights[edges]):
+        F.append((weight, subgraph))
+
+        if stop_early and subgraph.vcount() == n_nodes:
+            break
+
+    return F
+"""
