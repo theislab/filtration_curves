@@ -53,7 +53,7 @@ def create_curves(args):
     # Pad the filtration curves with zeros to have consistent lengths
     max_length = max(len(curve) for curve in filtration_curves)
     filtration_curves = [np.pad(curve, (0, max_length - len(curve)), mode='constant') for curve in tqdm(filtration_curves)]
-
+    
     return filtration_curves, y
 
 

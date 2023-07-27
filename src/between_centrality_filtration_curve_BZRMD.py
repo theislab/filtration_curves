@@ -1,5 +1,4 @@
 
-
 import argparse
 import time
 import glob
@@ -9,6 +8,7 @@ import igraph as ig
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
+import matplotlib.pyplot as plt
 import itertools
 from rf import *
 from utils import *
@@ -66,6 +66,21 @@ def create_curves(args):
     # Pad the filtration curves with zeros to have consistent lengths
     # max_length = max([len(curve) for curve in filtration_curves])
     # filtration_curves = [np.pad(curve, (0, max_length - len(curve)), mode='constant') for curve in tqdm(filtration_curves)]
+        # Get the number of classes
+        # Plot the filtration curves for each graph, colored by class
+    classes = list(set(y))
+    n_classes = len(classes)
+    class_colors = plt.cm.tab10(np.linspace(0, 1, n_classes))
+    for i, curve in enumerate(filtration_curves):
+        plt.step(np.arange(len(curve)), curve, color=class_colors[classes.index(y[i])], alpha=0.7)
+
+    # Add labels and title
+    plt.xlabel('Time')
+    plt.ylabel('Betweenness Centrality')
+    plt.title('Filtration Curves')
+
+    # Show the plot
+    plt.show()
 
     return filtration_curves, y
 

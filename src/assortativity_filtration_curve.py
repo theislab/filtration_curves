@@ -8,6 +8,7 @@ import igraph as ig
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
+import matplotlib.pyplot as plt
 
 from rf import *
 from utils import *
@@ -53,16 +54,39 @@ def create_curves(args):
         for lst in nested_assortativity_coefficients
     ]
 
+    # Get the number of classes
+    classes = list(set(y))
+    #n_classes = len(classes)
+    #print("Number of classes:", n_classes)
 
-    # Binarize the assortativity coefficients to create filtration curves
-    # max_assortativity = max(assortativity_coefficients)
-    # filtration_curves = [np.where(np.array(assortativity_coefficients) <= coefficient, 1, 0) for coefficient in tqdm(assortativity_coefficients)]
+    # Plot the filtration curves for each graph, colored by class
+    class_colors = ['red', 'green']
+    class_color_dict = {1.0: class_colors[0], -1.0: class_colors[1]}
+    for i, curve in enumerate(filtration_curves):
+        plt.plot(curve, color=class_color_dict[y[i]], alpha=0.01)
 
-    # Pad the filtration curves with zeros to have consistent lengths
-    # max_length = max([len(curve) for curve in filtration_curves])
-    # filtration_curves = [np.pad(curve, (0, max_length - len(curve)), mode='constant') for curve in tqdm(filtration_curves)]
+    # Add labels and title
+    plt.xlabel('Time')
+    plt.ylabel('Assortativity Coefficient')
+    plt.title('Filtration Curves')
 
+    # Show the plot
+    plt.show()
+
+    # Plot the filtration curves for each class separately
+    class_colors = plt.cm.tab10(np.linspace(0, 1, 10))
+    for c in classes:
+        class_indices = [i for i, label in enumerate(y) if label == c]
+        class_curves = [filtration_curves[i] for i in class_indices]
+        for curve in class_curves:
+            plt.plot(curve, color=class_colors[classes.index(c)], alpha=0.01)
+        plt.xlabel('Time')
+        plt.ylabel('Assortativity Coefficient')
+        plt.title(f'Filtration Curves for Class {c}')
+        plt.show()
+ 
     return filtration_curves, y
+
     
 
 if __name__ == "__main__":
@@ -94,7 +118,7 @@ if __name__ == "__main__":
         
         # Run the random forest
         run_rf(filtration_curves, y, n_iterations=10)
-
+        
     elif args.method == "inductive":
         # Format the curves as a dataframe
         filtration_curves = [pd.DataFrame(curve) for curve in tqdm(filtration_curves)]
@@ -104,7 +128,7 @@ if __name__ == "__main__":
 
         # Run the random forest
         run_rf_inductive(filtration_curves, y, column_names=column_names)
-
+        
     print("Execution time:", time.process_time() - start, "seconds")
 
 
